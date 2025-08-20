@@ -11,6 +11,23 @@
 
 ---
 
+## 📑 Table of Contents
+
+- [🚀 Key Features](#-key-features)
+- [🛠️ Hardware Requirements](#️-hardware-requirements)
+- [🔌 Pin Configuration & Wiring](#-pin-configuration--wiring)
+- [🏗️ Software Architecture](#️-software-architecture)
+- [🔧 Development Setup](#-development-setup)
+- [🌐 CAN Protocol Documentation](#-can-protocol-documentation)
+- [🎯 Usage Instructions](#-usage-instructions)
+- [🧪 Testing & Validation](#-testing--validation)
+- [📋 Module Reference](#-module-reference)
+- [🔄 Contributing](#-contributing)
+- [📜 License & Acknowledgments](#-license--acknowledgments)
+- [📞 Support & Resources](#-support--resources)
+
+---
+
 ## 🚀 Key Features
 
 ### 🔍 **Battery Monitoring & Protection**
