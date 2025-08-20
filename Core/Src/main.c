@@ -135,6 +135,9 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   static uint32_t heartbeat_counter = 0;
+  static uint32_t thermistor_counter = 0;
+  float thermistor_temps[8];  // Array to store all 8 thermistor temperatures
+  float adc_voltages[8];      // Array to store all 8 ADC voltage readings
   
   while (1)
   {
@@ -142,26 +145,50 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     
-    // Read ADC value from thermistor MUX
+    // Spread the heavy processing across multiple cycles to avoid timing hiccups
+    uint8_t cycle_phase = thermistor_counter % 10;  // Changed to 10-cycle pattern for 0.1sec temp updates
+    
+    // Set MUX to current channel first (before any heavy processing)
+    uint8_t current_channel = thermistor_counter % 8;  // Still cycle through 8 MUX channels
+    MUX_SetChannel(current_channel);
+    
+    // Read single ADC value for current MUX channel (after MUX has settled)
     uint16_t adc_value = ADC_ReadValue();
     
-    // Send ADC telemetry on new organized ID
-    CAN_TxData(adc_value);
+    // Single channel telemetry disabled for faster operation
+    // CAN_TxThermistorData(current_channel, adc_value);
     
-    // Read stack voltage from BQ76952 BMS
-    uint16_t stack_voltage_mv = BQ76952_ReadStackVoltage();
+    // Do the heavy processing only on specific cycles, spread out
+    if (cycle_phase == 0) {
+      // Read all thermistor temperatures (cycle 0)
+      ADC_ReadAllThermistors(thermistor_temps);
+    } else if (cycle_phase == 1) {
+      // Send thermistor temperatures in multiplexed CAN messages (cycle 1)
+      CAN_TxAllThermistorsMux(thermistor_temps);
+    } else if (cycle_phase == 2) {
+      // Read all voltages (cycle 2) - kept for potential future use
+      ADC_ReadAllVoltages(adc_voltages);
+    } else if (cycle_phase == 3) {
+      // ADC voltage telemetry disabled - no longer sending TELEMETRY_ADC messages
+      // CAN_TxAllVoltagesMux(adc_voltages);
+    }
     
-    // Send stack voltage telemetry on new organized ID
-    CAN_TxStackVoltage(stack_voltage_mv);
+    // Do lighter processing every cycle
+    if (cycle_phase == 4) {
+      // Read stack voltage from BQ76952 BMS
+      uint16_t stack_voltage_mv = BQ76952_ReadStackVoltage();
+      // Send stack voltage telemetry
+      CAN_TxStackVoltage(stack_voltage_mv);
+    } else if (cycle_phase == 5) {
+      // Send all cell voltages in grouped format
+      CAN_TxAllCellVoltagesMux();
+    } else if (cycle_phase == 6) {
+      // Process temperature-related CAN requests
+      CAN_ProcessTemperatureRequests();
+    }
     
-    // Send all cell voltages in grouped format every cycle (increased sampling rate)
-    CAN_TxAllCellVoltagesMux();
-    
-    // Process temperature-related CAN requests
-    CAN_ProcessTemperatureRequests();
-    
-    // Send heartbeat message every 100 cycles to verify CAN TX is working
-    if ((heartbeat_counter % 100) == 0) {
+    // Send heartbeat message every 1000 cycles (every 10 seconds with 10ms delay)
+    if ((heartbeat_counter % 1000) == 0) {
       CAN_SendHeartbeat(heartbeat_counter);
       
       // Reset the RX flag after reporting it in heartbeat
@@ -169,9 +196,10 @@ int main(void)
     }
     
     heartbeat_counter++;
+    thermistor_counter++;
     
-    // Reduced delay for faster sampling rate (100ms instead of 500ms)
-    HAL_Delay(100);
+    // Very fast 10ms delay for 0.01 second per channel cycling
+    HAL_Delay(10);
   }
   /* USER CODE END 3 */
 }

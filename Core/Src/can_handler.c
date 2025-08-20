@@ -265,6 +265,169 @@ void CAN_SendHeartbeat(uint32_t counter)
 }
 
 /**
+  * @brief  Send individual MUX channel thermistor data over CAN (single channel format)
+  * @param  mux_channel: MUX channel number (0-7)
+  * @param  adc_value: Raw ADC value for this channel
+  * @retval None
+  */
+void CAN_TxThermistorData(uint8_t mux_channel, uint16_t adc_value)
+{
+  // Clear TX data buffer
+  for (int i = 0; i < 8; i++) {
+    TxData[i] = 0;
+  }
+  
+  // Update header for individual ADC channel telemetry
+  TxHeader.StdId = CAN_ID_TELEMETRY_ADC;
+  
+  // Pack single channel data with special format (0xFF mux index indicates single channel mode)
+  TxData[0] = 0xFF;                                     // Special mux index for single channel mode
+  TxData[1] = mux_channel;                              // MUX channel (0-7)
+  TxData[2] = (uint8_t)(adc_value & 0xFF);             // ADC value LSB
+  TxData[3] = (uint8_t)((adc_value >> 8) & 0xFF);      // ADC value MSB
+  // Bytes 4-7 remain 0 (reserved)
+  
+  // Send CAN message
+  if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox) != HAL_OK) {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief  Send all thermistor temperatures in two multiplexed CAN messages
+  * @param  temperatures: Array of 8 temperature values in Celsius
+  * @retval None
+  */
+void CAN_TxAllThermistorsMux(float *temperatures)
+{
+  CAN_TxHeaderTypeDef TxHeader_Therm;
+  uint8_t TxData_Therm[8];
+  uint32_t TxMailbox_Therm;
+  
+  // Configure common header settings
+  TxHeader_Therm.ExtId = 0x00;
+  TxHeader_Therm.RTR = CAN_RTR_DATA;
+  TxHeader_Therm.IDE = CAN_ID_STD;
+  TxHeader_Therm.DLC = 8;
+  TxHeader_Therm.TransmitGlobalTime = DISABLE;
+  
+  // Send thermistors 1-4 (channels 0-3)
+  TxHeader_Therm.StdId = CAN_ID_THERMISTOR_TEMPS_1_4;
+  
+  // Convert temperatures to signed 16-bit integers (scaled by 10 for 0.1°C resolution)
+  int16_t temp1 = (int16_t)(temperatures[0] * 10.0f);
+  int16_t temp2 = (int16_t)(temperatures[1] * 10.0f);
+  int16_t temp3 = (int16_t)(temperatures[2] * 10.0f);
+  int16_t temp4 = (int16_t)(temperatures[3] * 10.0f);
+  
+  TxData_Therm[0] = (uint8_t)(temp1 & 0xFF);
+  TxData_Therm[1] = (uint8_t)((temp1 >> 8) & 0xFF);
+  TxData_Therm[2] = (uint8_t)(temp2 & 0xFF);
+  TxData_Therm[3] = (uint8_t)((temp2 >> 8) & 0xFF);
+  TxData_Therm[4] = (uint8_t)(temp3 & 0xFF);
+  TxData_Therm[5] = (uint8_t)((temp3 >> 8) & 0xFF);
+  TxData_Therm[6] = (uint8_t)(temp4 & 0xFF);
+  TxData_Therm[7] = (uint8_t)((temp4 >> 8) & 0xFF);
+  
+  HAL_CAN_AddTxMessage(&hcan1, &TxHeader_Therm, TxData_Therm, &TxMailbox_Therm);
+  HAL_Delay(2);  // Small delay between messages
+  
+  // Send thermistors 5-8 (channels 4-7)
+  TxHeader_Therm.StdId = CAN_ID_THERMISTOR_TEMPS_5_8;
+  
+  int16_t temp5 = (int16_t)(temperatures[4] * 10.0f);
+  int16_t temp6 = (int16_t)(temperatures[5] * 10.0f);
+  int16_t temp7 = (int16_t)(temperatures[6] * 10.0f);
+  int16_t temp8 = (int16_t)(temperatures[7] * 10.0f);
+  
+  TxData_Therm[0] = (uint8_t)(temp5 & 0xFF);
+  TxData_Therm[1] = (uint8_t)((temp5 >> 8) & 0xFF);
+  TxData_Therm[2] = (uint8_t)(temp6 & 0xFF);
+  TxData_Therm[3] = (uint8_t)((temp6 >> 8) & 0xFF);
+  TxData_Therm[4] = (uint8_t)(temp7 & 0xFF);
+  TxData_Therm[5] = (uint8_t)((temp7 >> 8) & 0xFF);
+  TxData_Therm[6] = (uint8_t)(temp8 & 0xFF);
+  TxData_Therm[7] = (uint8_t)((temp8 >> 8) & 0xFF);
+  
+  HAL_CAN_AddTxMessage(&hcan1, &TxHeader_Therm, TxData_Therm, &TxMailbox_Therm);
+}
+
+/**
+  * @brief  Send all ADC voltages in multiplexed format (2 voltages per message, 4 mux values)
+  * @param  voltages: Array of 8 voltage values in volts
+  * @retval None
+  */
+void CAN_TxAllVoltagesMux(float *voltages)
+{
+  CAN_TxHeaderTypeDef TxHeader_Volt;
+  uint8_t TxData_Volt[8];
+  uint32_t TxMailbox_Volt;
+  
+  // Configure common header settings for multiplexed ADC voltage telemetry
+  TxHeader_Volt.StdId = CAN_ID_TELEMETRY_ADC;  // Single ID for all ADC voltages
+  TxHeader_Volt.ExtId = 0x00;
+  TxHeader_Volt.RTR = CAN_RTR_DATA;
+  TxHeader_Volt.IDE = CAN_ID_STD;
+  TxHeader_Volt.DLC = 8;
+  TxHeader_Volt.TransmitGlobalTime = DISABLE;
+  
+  // Send voltages 1-2 (channels 0-1) with mux index 0
+  TxData_Volt[0] = 0x00;  // Mux index 0
+  uint16_t volt1 = (uint16_t)(voltages[0] * 1000.0f);  // Convert to mV
+  uint16_t volt2 = (uint16_t)(voltages[1] * 1000.0f);  // Convert to mV
+  TxData_Volt[1] = (uint8_t)(volt1 & 0xFF);
+  TxData_Volt[2] = (uint8_t)((volt1 >> 8) & 0xFF);
+  TxData_Volt[3] = (uint8_t)(volt2 & 0xFF);
+  TxData_Volt[4] = (uint8_t)((volt2 >> 8) & 0xFF);
+  TxData_Volt[5] = 0x00;  // Reserved
+  TxData_Volt[6] = 0x00;  // Reserved
+  TxData_Volt[7] = 0x00;  // Reserved
+  HAL_CAN_AddTxMessage(&hcan1, &TxHeader_Volt, TxData_Volt, &TxMailbox_Volt);
+  HAL_Delay(2);
+  
+  // Send voltages 3-4 (channels 2-3) with mux index 1
+  TxData_Volt[0] = 0x01;  // Mux index 1
+  uint16_t volt3 = (uint16_t)(voltages[2] * 1000.0f);
+  uint16_t volt4 = (uint16_t)(voltages[3] * 1000.0f);
+  TxData_Volt[1] = (uint8_t)(volt3 & 0xFF);
+  TxData_Volt[2] = (uint8_t)((volt3 >> 8) & 0xFF);
+  TxData_Volt[3] = (uint8_t)(volt4 & 0xFF);
+  TxData_Volt[4] = (uint8_t)((volt4 >> 8) & 0xFF);
+  TxData_Volt[5] = 0x00;  // Reserved
+  TxData_Volt[6] = 0x00;  // Reserved
+  TxData_Volt[7] = 0x00;  // Reserved
+  HAL_CAN_AddTxMessage(&hcan1, &TxHeader_Volt, TxData_Volt, &TxMailbox_Volt);
+  HAL_Delay(2);
+  
+  // Send voltages 5-6 (channels 4-5) with mux index 2
+  TxData_Volt[0] = 0x02;  // Mux index 2
+  uint16_t volt5 = (uint16_t)(voltages[4] * 1000.0f);
+  uint16_t volt6 = (uint16_t)(voltages[5] * 1000.0f);
+  TxData_Volt[1] = (uint8_t)(volt5 & 0xFF);
+  TxData_Volt[2] = (uint8_t)((volt5 >> 8) & 0xFF);
+  TxData_Volt[3] = (uint8_t)(volt6 & 0xFF);
+  TxData_Volt[4] = (uint8_t)((volt6 >> 8) & 0xFF);
+  TxData_Volt[5] = 0x00;  // Reserved
+  TxData_Volt[6] = 0x00;  // Reserved
+  TxData_Volt[7] = 0x00;  // Reserved
+  HAL_CAN_AddTxMessage(&hcan1, &TxHeader_Volt, TxData_Volt, &TxMailbox_Volt);
+  HAL_Delay(2);
+  
+  // Send voltages 7-8 (channels 6-7) with mux index 3
+  TxData_Volt[0] = 0x03;  // Mux index 3
+  uint16_t volt7 = (uint16_t)(voltages[6] * 1000.0f);
+  uint16_t volt8 = (uint16_t)(voltages[7] * 1000.0f);
+  TxData_Volt[1] = (uint8_t)(volt7 & 0xFF);
+  TxData_Volt[2] = (uint8_t)((volt7 >> 8) & 0xFF);
+  TxData_Volt[3] = (uint8_t)(volt8 & 0xFF);
+  TxData_Volt[4] = (uint8_t)((volt8 >> 8) & 0xFF);
+  TxData_Volt[5] = 0x00;  // Reserved
+  TxData_Volt[6] = 0x00;  // Reserved
+  TxData_Volt[7] = 0x00;  // Reserved
+  HAL_CAN_AddTxMessage(&hcan1, &TxHeader_Volt, TxData_Volt, &TxMailbox_Volt);
+}
+
+/**
   * @brief  Process temperature-related CAN requests
   * @retval None
   */

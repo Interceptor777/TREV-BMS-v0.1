@@ -36,6 +36,9 @@ void CAN_TxAllCellVoltagesMux(void);
 void CAN_SendErrorMessage(uint8_t error_code);
 void CAN_SendHeartbeat(uint32_t counter);
 void CAN_ProcessTemperatureRequests(void);
+void CAN_TxThermistorData(uint8_t mux_channel, uint16_t adc_value);
+void CAN_TxAllThermistorsMux(float *temperatures);
+void CAN_TxAllVoltagesMux(float *voltages);
 
 /* External Variables --------------------------------------------------------*/
 extern CAN_HandleTypeDef hcan1;

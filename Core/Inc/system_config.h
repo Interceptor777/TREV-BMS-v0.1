@@ -47,11 +47,13 @@ extern "C" {
 #define CAN_ID_WRITE_CELL_BALANCE_REQ     0x108  // Write cell balancing config
 #define CAN_ID_WRITE_CELL_BALANCE_RESP    0x109  // Response for cell balancing
 
-// 0x600-0x61F: Telemetry Information (4 IDs used of 32 available)
-#define CAN_ID_TELEMETRY_ADC             0x600  // ADC thermistor readings
+// 0x600-0x61F: Telemetry Information (6 IDs used of 32 available)
+#define CAN_ID_TELEMETRY_ADC             0x600  // Multiplexed ADC voltage readings (all channels)
 #define CAN_ID_TELEMETRY_STACK_VOLTAGE   0x601  // Stack voltage telemetry
 #define CAN_ID_CELL_VOLTAGES             0x602  // Multiplexed all cell voltages
 #define CAN_ID_TELEMETRY_HEARTBEAT       0x603  // System heartbeat
+#define CAN_ID_THERMISTOR_TEMPS_1_4      0x604  // Thermistor temperatures 1-4
+#define CAN_ID_THERMISTOR_TEMPS_5_8      0x605  // Thermistor temperatures 5-8
 
 // 0x700-0x71F: Debug/Legacy Messages (2 IDs used of 32 available)
 #define CAN_ID_ERROR_DEBUG               0x700  // Error debug messages

@@ -60,8 +60,8 @@ all: main-build
 main-build: ISO_CAN_TEST.elf secondary-outputs
 
 # Tool invocations
-ISO_CAN_TEST.elf ISO_CAN_TEST.map: $(OBJS) $(USER_OBJS) C:\Users\Ali\Music\ISO_CAN_TEST\ -\ Copy\STM32L432KCUX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "ISO_CAN_TEST.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Ali\Music\ISO_CAN_TEST - Copy\STM32L432KCUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ISO_CAN_TEST.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+ISO_CAN_TEST.elf ISO_CAN_TEST.map: $(OBJS) $(USER_OBJS) C:\Users\Ali\Desktop\TREV-BMS-v0.1\STM32L432KCUX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "ISO_CAN_TEST.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Ali\Desktop\TREV-BMS-v0.1\STM32L432KCUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ISO_CAN_TEST.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

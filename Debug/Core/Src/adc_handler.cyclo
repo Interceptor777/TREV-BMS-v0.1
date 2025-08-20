@@ -1,1 +1,7 @@
 ../Core/Src/adc_handler.c:29:10:ADC_ReadValue	3
+../Core/Src/adc_handler.c:52:6:MUX_SetChannel	5
+../Core/Src/adc_handler.c:91:10:MUX_ReadChannel	1
+../Core/Src/adc_handler.c:105:7:ADC_CalculateThermistorTemp	5
+../Core/Src/adc_handler.c:159:6:ADC_ReadAllThermistors	2
+../Core/Src/adc_handler.c:178:7:ADC_ConvertToVoltage	1
+../Core/Src/adc_handler.c:188:6:ADC_ReadAllVoltages	2

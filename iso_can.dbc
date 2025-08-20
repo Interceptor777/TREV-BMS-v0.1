@@ -8,7 +8,6 @@ NS_ :
     CAT_DEF_
     CAT_
     FILTER
-    BA_DEF_DEF_
     EV_DATA_
     ENVVAR_DATA_
     SGTYPE_
@@ -71,9 +70,24 @@ BO_ 265 WRITE_CELL_BALANCE_RESP: 8 BMS
  SG_ Reserved : 8|56@1+ (1,0) [0|0] "" Vector__XXX
 
 BO_ 1536 TELEMETRY_ADC: 8 BMS
- SG_ MuxChannel : 0|8@1+ (1,0) [0|7] "" Vector__XXX
- SG_ ADCValue : 8|16@1+ (1,0) [0|4095] "" Vector__XXX
- SG_ Reserved : 24|40@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MUX_TYPE M : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ SingleChan_Number m255 : 8|8@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ SingleChan_ADCValue m255 : 16|16@1+ (1,0) [0|4095] "" Vector__XXX
+ SG_ SingleChan_Reserved m255 : 32|32@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Volt1_mV m0 : 8|16@1+ (1,0) [0|5000] "mV" Vector__XXX
+ SG_ Volt2_mV m0 : 24|16@1+ (1,0) [0|5000] "mV" Vector__XXX
+ SG_ Volt1_2_Reserved m0 : 40|24@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Volt3_mV m1 : 8|16@1+ (1,0) [0|5000] "mV" Vector__XXX
+ SG_ Volt4_mV m1 : 24|16@1+ (1,0) [0|5000] "mV" Vector__XXX
+ SG_ Volt3_4_Reserved m1 : 40|24@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Volt5_mV m2 : 8|16@1+ (1,0) [0|5000] "mV" Vector__XXX
+ SG_ Volt6_mV m2 : 24|16@1+ (1,0) [0|5000] "mV" Vector__XXX
+ SG_ Volt5_6_Reserved m2 : 40|24@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Volt7_mV m3 : 8|16@1+ (1,0) [0|5000] "mV" Vector__XXX
+ SG_ Volt8_mV m3 : 24|16@1+ (1,0) [0|5000] "mV" Vector__XXX
+ SG_ Volt7_8_Reserved m3 : 40|24@1+ (1,0) [0|0] "" Vector__XXX
+
+VAL_ 1536 MUX_TYPE 0 "ADC_1_2" 1 "ADC_3_4" 2 "ADC_5_6" 3 "ADC_7_8" 255 "SingleChannel";
 
 BO_ 1537 TELEMETRY_STACK_VOLTAGE: 8 BMS
  SG_ StackVoltage_mV : 0|16@1+ (1,0) [0|70000] "mV" Vector__XXX
@@ -105,6 +119,18 @@ BO_ 1539 TELEMETRY_HEARTBEAT: 8 BMS
  SG_ Counter : 8|8@1+ (1,0) [0|255] "" Vector__XXX
  SG_ Reserved : 16|48@1+ (1,0) [0|0] "" Vector__XXX
 
+BO_ 1540 THERMISTOR_TEMPS_1_4: 8 BMS
+ SG_ Temp2 : 16|16@1- (0.1,0) [-400|1250] "degC" Vector__XXX
+ SG_ Temp1 : 0|16@1- (0.1,0) [-400|1250] "degC" Vector__XXX
+ SG_ Temp3 : 32|16@1- (0.1,0) [-400|1250] "degC" Vector__XXX
+ SG_ Temp4 : 48|16@1- (0.1,0) [-400|1250] "degC" Vector__XXX
+
+BO_ 1541 THERMISTOR_TEMPS_5_8: 8 BMS
+ SG_ Temp5 : 0|16@1- (0.1,0) [-400|1250] "degC" Vector__XXX
+ SG_ Temp6 : 16|16@1- (0.1,0) [-400|1250] "degC" Vector__XXX
+ SG_ Temp7 : 32|16@1- (0.1,0) [-400|1250] "degC" Vector__XXX
+ SG_ Temp8 : 48|16@1- (0.1,0) [-400|1250] "degC" Vector__XXX
+
 BO_ 1792 ERROR_DEBUG: 8 BMS
  SG_ ErrorCode : 0|8@1+ (1,0) [0|255] "" Vector__XXX
  SG_ Reserved : 8|56@1+ (1,0) [0|0] "" Vector__XXX
@@ -120,9 +146,11 @@ CM_ BO_ 260 "Request current temperature thresholds";
 CM_ BO_ 261 "Response with current min/max temperature thresholds";
 CM_ BO_ 262 "Set new temperature thresholds";
 CM_ BO_ 263 "Response to temperature threshold write";
-CM_ BO_ 1536 "ADC thermistor reading for selected MUX channel";
+CM_ BO_ 1536 "Multiplexed ADC telemetry: mux 0-3=voltage pairs 1-2/3-4/5-6/7-8, mux 255=single channel mode";
 CM_ BO_ 1537 "Stack voltage telemetry";
 CM_ BO_ 1538 "All cell voltages (multiplexed: 0=cells 1-3, 1=cells 4-6, 2=cells 7-9, 3=cells 10-12, 4=cells 13-15, 5=cell 16)";
 CM_ BO_ 1539 "System heartbeat/status";
+CM_ BO_ 1540 "Thermistor temperatures 1-4 (0.1°C resolution, signed 16-bit)";
+CM_ BO_ 1541 "Thermistor temperatures 5-8 (0.1°C resolution, signed 16-bit)";
 CM_ BO_ 1792 "Error/debug message";
 CM_ BO_ 1793 "Legacy temperature threshold command (backward compatibilitxy)";
