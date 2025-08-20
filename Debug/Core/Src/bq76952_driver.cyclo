@@ -1,0 +1,8 @@
+../Core/Src/bq76952_driver.c:30:10:BQ76952_ReadStackVoltage	2
+../Core/Src/bq76952_driver.c:52:10:BQ76952_ReadCellVoltage	4
+../Core/Src/bq76952_driver.c:83:19:BQ76952_WriteDataMemory	15
+../Core/Src/bq76952_driver.c:179:19:BQ76952_SetTemperatureThresholds	7
+../Core/Src/bq76952_driver.c:222:19:BQ76952_ReadDataMemory	17
+../Core/Src/bq76952_driver.c:325:19:BQ76952_ReadDataMemory_Simple	6
+../Core/Src/bq76952_driver.c:365:19:BQ76952_ResetCommState	2
+../Core/Src/bq76952_driver.c:396:19:BQ76952_ReadTemperatureThresholds	20
