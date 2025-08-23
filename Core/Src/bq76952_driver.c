@@ -325,7 +325,6 @@ HAL_StatusTypeDef BQ76952_ReadDataMemory(uint16_t address, uint8_t *data, uint8_
 HAL_StatusTypeDef BQ76952_ReadDataMemory_Simple(uint16_t address, uint8_t *data, uint8_t length)
 {
   uint8_t subcommand[2];
-  uint8_t i;
   
   if (length > 1 || data == NULL) {
     return HAL_ERROR;  // For debugging, only read 1 byte at a time

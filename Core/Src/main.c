@@ -153,7 +153,7 @@ int main(void)
     MUX_SetChannel(current_channel);
     
     // Read single ADC value for current MUX channel (after MUX has settled)
-    uint16_t adc_value = ADC_ReadValue();
+    //uint16_t adc_value = ADC_ReadValue();
     
     // Single channel telemetry disabled for faster operation
     // CAN_TxThermistorData(current_channel, adc_value);
@@ -481,8 +481,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "can_handler.h"
+#include "main.h"
 #include "system_config.h"
 #include "bq76952_driver.h"
 
